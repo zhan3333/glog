@@ -32,7 +32,10 @@ const (
 )
 
 const (
-	DAILY = iota
+	// 单文件驱动
+	SINGLE = iota
+	// 日驱动
+	DAILY
 )
 
 type Log struct {
@@ -49,7 +52,7 @@ var LogConfigs = map[string]Log{}
 var DefLogChannel = "default"
 
 // 默认日志格式
-var DefaultFormat logrus.Formatter =  LocalFormatter{&logrus.JSONFormatter{
+var DefaultFormat logrus.Formatter = LocalFormatter{&logrus.JSONFormatter{
 	PrettyPrint:       false,
 	DisableHTMLEscape: true,
 }}
