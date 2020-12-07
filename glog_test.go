@@ -62,3 +62,19 @@ func TestSetDefaultFormatter(t *testing.T) {
 		"test": "123",
 	}).Info("test")
 }
+
+func TestWrite(t *testing.T) {
+	glog.LogConfigs = map[string]glog.Log{
+		glog.DefLogChannel: {
+			Driver: glog.DAILY,
+			Path:   "logs/test.log",
+			Level:  glog.DebugLevel,
+			Days:   30,
+		},
+	}
+	glog.ReloadChannels()
+	glog.Def().WithFields(logrus.Fields{
+		"test": "write from glog.Def()",
+	}).Info("test")
+	glog.Def().Write.Write([]byte("write from glog.Def().Write"))
+}
