@@ -11,5 +11,6 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rifflock/lfshook v0.0.0-20180920164130-b9218ef580f5
 	github.com/sirupsen/logrus v1.6.0
+	github.com/stretchr/testify v1.3.0
 	github.com/tebeka/strftime v0.1.5 // indirect
 )

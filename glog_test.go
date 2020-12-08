@@ -3,6 +3,7 @@ package glog_test
 import (
 	"encoding/json"
 	"github.com/sirupsen/logrus"
+	"github.com/stretchr/testify/assert"
 	"github.com/zhan3333/glog"
 	"log"
 	"testing"
@@ -61,6 +62,28 @@ func TestSetDefaultFormatter(t *testing.T) {
 	glog.Def().WithFields(logrus.Fields{
 		"test": "123",
 	}).Info("test")
+}
+
+func TestOut(t *testing.T) {
+	glog.LogConfigs = map[string]glog.Log{
+		glog.DefLogChannel: {
+			Driver:       glog.DAILY,
+			Path:         "logs/test.log",
+			Level:        glog.DebugLevel,
+			Days:         30,
+			LogFormatter: nil,
+			ReportCall:   false,
+			Hooks:        nil,
+		},
+	}
+	glog.ReloadChannels()
+	// channel write
+	glog.Def().WithFields(logrus.Fields{
+		"test": "log from glog.Def().Info()",
+	}).Info("test")
+	// out obj write
+	_, err := glog.Def().Out.Write([]byte("log from glog.Def().Out"))
+	assert.Nil(t, err)
 }
 
 func TestWrite(t *testing.T) {
