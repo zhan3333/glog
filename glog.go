@@ -29,10 +29,12 @@ const (
 )
 
 const (
+	NONE = iota
 	// 单文件驱动
-	SINGLE = iota
+	SINGLE
 	// 日驱动
 	DAILY
+	STDOUT
 )
 
 var AllLevels = logrus.AllLevels
@@ -47,15 +49,25 @@ type Log struct {
 	Hooks        []logrus.Hook
 }
 
-var LogConfigs = map[string]Log{}
-var DefLogChannel = "default"
-
 // 默认日志格式
 var DefaultFormat logrus.Formatter = LocalFormatter{&logrus.JSONFormatter{
 	PrettyPrint:       false,
 	DisableHTMLEscape: true,
 }}
+var DefLogChannel = "default"
+var LogConfigs = map[string]Log{
+	DefLogChannel: {
+		Driver:       STDOUT,
+		Level:        TraceLevel,
+		LogFormatter: DefaultFormat,
+		ReportCall:   true,
+	},
+}
+
+// 缓存渠道信息
 var channels = map[string]*Entry{}
+
+// 被打开的文件对象
 var openFiles []*os.File
 
 type LocalFormatter struct {

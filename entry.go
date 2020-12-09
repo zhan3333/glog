@@ -41,7 +41,14 @@ func NewEntry(config Log) *Entry {
 	for _, h := range config.Hooks {
 		entry.AddHook(h)
 	}
-	if config.Driver == DAILY {
+
+	if config.Driver == NONE {
+		config.Driver = STDOUT
+	}
+	switch config.Driver {
+	case STDOUT:
+		break
+	case DAILY:
 		// daily driver
 		dailyHook, write, err := newDailyHook(config.Path, time.Duration(config.Days)*time.Hour*24, format)
 		entry.Write = write
@@ -49,7 +56,7 @@ func NewEntry(config Log) *Entry {
 			logrus.WithError(err).Errorf("glog channel path [%s] failed", config.Path)
 		}
 		entry.AddHook(dailyHook)
-	} else {
+	case SINGLE:
 		entry.SetFormatter(format)
 		// create dir
 		err = os.MkdirAll(filepath.Dir(config.Path), os.ModePerm)

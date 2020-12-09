@@ -5,11 +5,13 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/zhan3333/glog"
+	"io/ioutil"
 	"log"
+	"os"
 	"testing"
 )
 
-func TestMain(m *testing.M) {
+func TestLog(t *testing.T) {
 	glog.LogConfigs = map[string]glog.Log{
 		glog.DefLogChannel: {
 			Driver:       glog.DAILY,
@@ -21,10 +23,6 @@ func TestMain(m *testing.M) {
 			Hooks:        nil,
 		},
 	}
-	m.Run()
-}
-
-func TestLog(t *testing.T) {
 	log.Print("log by log")
 	glog.Def().Print("log by glog.Default()")
 	glog.Channel("gin").Print("log by glog.Channel(\"gin\")")
@@ -32,6 +30,17 @@ func TestLog(t *testing.T) {
 }
 
 func TestAllChannel(t *testing.T) {
+	glog.LogConfigs = map[string]glog.Log{
+		glog.DefLogChannel: {
+			Driver:       glog.DAILY,
+			Path:         "logs/def.log",
+			Level:        glog.DebugLevel,
+			Days:         30,
+			LogFormatter: nil,
+			ReportCall:   false,
+			Hooks:        nil,
+		},
+	}
 	for name := range glog.LogConfigs {
 		glog.Channel(name).Printf("Test")
 	}
@@ -45,6 +54,17 @@ func (Format) Format(entry *logrus.Entry) ([]byte, error) {
 }
 
 func TestSetDefaultFormatter(t *testing.T) {
+	glog.LogConfigs = map[string]glog.Log{
+		glog.DefLogChannel: {
+			Driver:       glog.DAILY,
+			Path:         "logs/def.log",
+			Level:        glog.DebugLevel,
+			Days:         30,
+			LogFormatter: nil,
+			ReportCall:   false,
+			Hooks:        nil,
+		},
+	}
 	newFormat := Format{}
 	glog.LogConfigs = map[string]glog.Log{
 		glog.DefLogChannel: {
@@ -65,6 +85,17 @@ func TestSetDefaultFormatter(t *testing.T) {
 }
 
 func TestOut(t *testing.T) {
+	glog.LogConfigs = map[string]glog.Log{
+		glog.DefLogChannel: {
+			Driver:       glog.DAILY,
+			Path:         "logs/def.log",
+			Level:        glog.DebugLevel,
+			Days:         30,
+			LogFormatter: nil,
+			ReportCall:   false,
+			Hooks:        nil,
+		},
+	}
 	glog.LogConfigs = map[string]glog.Log{
 		glog.DefLogChannel: {
 			Driver:       glog.DAILY,
@@ -100,4 +131,31 @@ func TestWrite(t *testing.T) {
 		"test": "write from glog.Def()",
 	}).Info("test")
 	glog.Def().Write.Write([]byte("write from glog.Def().Write"))
+}
+
+func TestDefaultChannel(t *testing.T) {
+	glog.Def().Infoln("test")
+}
+
+// 测试单文件驱动
+func TestSingleDriver(t *testing.T) {
+	assert.Nil(t, os.Remove("logs/test.log"))
+	glog.LogConfigs = map[string]glog.Log{
+		glog.DefLogChannel: {
+			Driver: glog.SINGLE,
+			Path:   "logs/test.log",
+			Level:  glog.DebugLevel,
+			Days:   30,
+		},
+	}
+	glog.Def().Infoln("test")
+	b, err := ioutil.ReadFile("logs/test.log")
+	assert.Nil(t, err)
+	t.Log(string(b))
+	type Msg struct {
+		Msg string
+	}
+	var msg Msg
+	assert.Nil(t, json.Unmarshal(b, &msg))
+	assert.Equal(t, "test", msg.Msg)
 }
