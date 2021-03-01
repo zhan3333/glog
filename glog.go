@@ -93,7 +93,7 @@ func Channel(name string) *Entry {
 		channels[name] = NewEntry(c)
 		return channels[name]
 	}
-	return channels["default"]
+	return channels[DefLogChannel]
 }
 
 // 加载所有通道
