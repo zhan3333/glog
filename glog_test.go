@@ -2,6 +2,7 @@ package glog_test
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/zhan3333/glog"
@@ -9,6 +10,7 @@ import (
 	"log"
 	"os"
 	"testing"
+	"time"
 )
 
 func TestLog(t *testing.T) {
@@ -137,9 +139,12 @@ func TestDefaultChannel(t *testing.T) {
 	glog.Def().Infoln("test")
 }
 
-// 测试单文件驱动
+//测试 Single 驱动
 func TestSingleDriver(t *testing.T) {
-	assert.Nil(t, os.Remove("logs/test.log"))
+	file := "logs/test.log"
+	if _, err := os.Stat(file); (err != nil && os.IsExist(err)) || err == nil {
+		assert.Nil(t, os.Remove(file))
+	}
 	glog.LogConfigs = map[string]glog.Log{
 		glog.DefLogChannel: {
 			Driver: glog.SINGLE,
@@ -150,6 +155,32 @@ func TestSingleDriver(t *testing.T) {
 	}
 	glog.Def().Infoln("test")
 	b, err := ioutil.ReadFile("logs/test.log")
+	assert.Nil(t, err)
+	t.Log(string(b))
+	type Msg struct {
+		Msg string
+	}
+	var msg Msg
+	assert.Nil(t, json.Unmarshal(b, &msg))
+	assert.Equal(t, "test", msg.Msg)
+}
+
+//测试 Daily 驱动
+func TestDailyLog(t *testing.T) {
+	file := fmt.Sprintf("logs/test-%s.log", time.Now().Format("2006-01-02"))
+	glog.LogConfigs = map[string]glog.Log{
+		glog.DefLogChannel: {
+			Driver: glog.DAILY,
+			Path:   "logs/test.log",
+			Level:  glog.DebugLevel,
+			Days:   30,
+		},
+	}
+	if _, err := os.Stat(file); (err != nil && os.IsExist(err)) || err == nil {
+		assert.Nil(t, os.Remove(file))
+	}
+	glog.Def().Infoln("test")
+	b, err := ioutil.ReadFile(file)
 	assert.Nil(t, err)
 	t.Log(string(b))
 	type Msg struct {

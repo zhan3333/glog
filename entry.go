@@ -6,6 +6,7 @@ import (
 	"github.com/rifflock/lfshook"
 	"github.com/sirupsen/logrus"
 	"io"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -56,6 +57,7 @@ func NewEntry(config Log) *Entry {
 			logrus.WithError(err).Errorf("glog channel path [%s] failed", config.Path)
 		}
 		entry.AddHook(dailyHook)
+		entry.SetOutput(ioutil.Discard)
 	case SINGLE:
 		entry.SetFormatter(format)
 		// create dir
