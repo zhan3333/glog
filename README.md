@@ -4,4 +4,4 @@
 
 ## 安装
 
-`go get -u github.com@zhan3333/gdb@v2`
+`go get -u github.com@zhan3333/glog`
